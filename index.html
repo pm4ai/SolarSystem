@@ -1490,7 +1490,7 @@ function bindVideoPosters(){
           <div class="vc-btn vc-mute" title="静音/恢复">🔊</div>
           <input type="range" class="vc-vol" min="0" max="100" step="1" value="100" title="音量">
         </div>
-        <iframe id="${frameId}" src="https://www.youtube.com/embed/${vid}?enablejsapi=1&autoplay=1&mute=0&rel=0&controls=0&showinfo=0&modestbranding=1&iv_load_policy=3&disablekb=1&playsinline=1&fs=0" title="介绍视频" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
+        <iframe id="${frameId}" src="https://www.youtube.com/embed/${vid}?enablejsapi=1&autoplay=1&mute=0&rel=0&controls=0&showinfo=0&modestbranding=1&iv_load_policy=3&disablekb=1&playsinline=1&fs=0&vq=hd1080" title="介绍视频" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
       facade.classList.add('on');
       poster.style.display = 'none';
       if (!window.YT){ loadYouTubeAPI(); }
@@ -1504,10 +1504,19 @@ function bindVideoPosters(){
       const fmt = (s) => { s = Math.max(0, s|0); return (s/60|0) + ':' + String(s%60).padStart(2,'0'); };
       const bindPlayer = () => {
         let ready = false, seeking = false, tick = null;
+        const setMaxQuality = (p) => {
+          // 请求最高清晰度：取可用档位的第一个（YT 按从高到低排列）
+          try {
+            const levels = p.getAvailableQualityLevels ? p.getAvailableQualityLevels() : [];
+            p.setPlaybackQuality(levels.length ? levels[0] : 'highres');
+          } catch(_){}
+        };
         const player = new YT.Player(frameId, {
           events: {
             onReady: () => {
-              ready = true; player.playVideo();
+              ready = true;
+              setMaxQuality(player);
+              player.playVideo();
               volBar.value = player.getVolume();
               // 进度心跳：驱动进度条与时间显示（拖动中暂不回写）
               tick = setInterval(() => {
@@ -1521,7 +1530,10 @@ function bindVideoPosters(){
             },
             // 用真实播放状态驱动遮罩样式，避免本地标志与实际状态脱节
             onStateChange: (e) => {
-              if (e.data === YT.PlayerState.PLAYING){ overlay.classList.remove('paused'); playBtn.textContent = '❚❚'; }
+              if (e.data === YT.PlayerState.PLAYING){
+                overlay.classList.remove('paused'); playBtn.textContent = '❚❚';
+                setMaxQuality(player);   // 播放开始后清晰度档位才齐全，再锁一次最高档
+              }
               else if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED){ overlay.classList.add('paused'); playBtn.textContent = '▶'; }
             }
           }
