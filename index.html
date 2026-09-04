@@ -144,21 +144,24 @@
   .p-video .video-body{position:relative;aspect-ratio:16/9}
   .p-video iframe{display:block;width:100%;height:100%;border:0}
   .p-video .video-empty{padding:26px 16px;text-align:center;font-size:11.5px;letter-spacing:1px;color:var(--text-dim);line-height:1.8}
-  /* 点击封面播放：默认只显示自定义封面，点击后才挂载无控件 iframe，纯画面、无浮层 */
+  /* 点击封面播放：默认显示视频缩略图封面，点击后才挂载无控件 iframe，纯画面、无浮层 */
   .video-poster{
     position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
     cursor:pointer;background:linear-gradient(150deg,#0a1024,#050a18 60%,#0a0e22);
-    transition:background .3s;
+    background-size:cover;background-position:center;
+    transition:filter .3s;
   }
-  .video-poster:hover{background:linear-gradient(150deg,#0d1533,#071028 60%,#0d1630)}
+  .video-poster::before{content:"";position:absolute;inset:0;background:rgba(4,10,24,.35);transition:background .3s}  /* 压暗缩略图，突出播放键 */
+  .video-poster:hover::before{background:rgba(4,10,24,.15)}
   .video-poster .vp-play{
+    position:relative;z-index:1;
     width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-    background:rgba(0,212,255,.12);border:2px solid var(--neon-blue);box-shadow:0 0 22px rgba(0,212,255,.5);
+    background:rgba(4,10,24,.6);border:2px solid var(--neon-blue);box-shadow:0 0 22px rgba(0,212,255,.5);
     transition:transform .25s, box-shadow .25s;
   }
   .video-poster:hover .vp-play{transform:scale(1.08);box-shadow:0 0 30px rgba(0,212,255,.8)}
   .video-poster .vp-play::after{content:"";display:block;width:0;height:0;border-left:18px solid var(--neon-blue);border-top:11px solid transparent;border-bottom:11px solid transparent;margin-left:4px}
-  .video-poster .vp-text{font-size:11px;letter-spacing:3px;color:var(--text-dim)}
+  .video-poster .vp-text{position:relative;z-index:1;font-size:11px;letter-spacing:3px;color:#cfe3ff;text-shadow:0 1px 6px rgba(0,0,0,.9)}
   .video-facade{position:absolute;inset:0;display:none}
   .video-facade.on{display:block}
   /* 大屏/小窗切换按钮（始终位于视频右上角，浮于遮罩之上） */
@@ -1401,7 +1404,7 @@ function renderPanel(data){
       <span class="p-type">恒星系统 · 银河系猎户臂</span>
       <div class="p-video">
         <div class="video-body">
-          <div class="video-poster" data-vid="cD7d95_pbm8" data-idx="0" role="button" aria-label="播放太阳系介绍视频">
+          <div class="video-poster" data-vid="cD7d95_pbm8" data-idx="0" role="button" aria-label="播放太阳系介绍视频" style="background-image:linear-gradient(rgba(4,10,24,.15),rgba(4,10,24,.15)),url('https://i.ytimg.com/vi/cD7d95_pbm8/hqdefault.jpg')">
             <div class="vp-play"></div>
             <div class="vp-text">点击播放</div>
           </div>
@@ -1445,7 +1448,7 @@ function renderPanel(data){
        <div class="p-video">
          ${videos.length > 1 ? `<div class="video-head">${v.label}</div>` : ''}
          <div class="video-body">
-           <div class="video-poster" data-vid="${v.id}" data-idx="${i}" role="button" aria-label="播放 ${v.label} 介绍视频">
+           <div class="video-poster" data-vid="${v.id}" data-idx="${i}" role="button" aria-label="播放 ${v.label} 介绍视频" style="background-image:linear-gradient(rgba(4,10,24,.15),rgba(4,10,24,.15)),url('https://i.ytimg.com/vi/${v.id}/hqdefault.jpg')">
              <div class="vp-play"></div>
              <div class="vp-text">点击播放</div>
            </div>
